@@ -1,7 +1,7 @@
 
 爬虫代理IP池
 =======
-[![Yii2](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](http://www.spiderpy.cn/)
+[![Build Status](https://travis-ci.org/jhao104/proxy_pool.svg?branch=master)](https://travis-ci.org/jhao104/proxy_pool)[![Yii2](https://img.shields.io/badge/Powered_by-Yii_Framework-green.svg?style=flat)](http://www.spiderpy.cn/)
 
 
 > 在公司做分布式深网爬虫，搭建了一套稳定的代理池服务，为上千个爬虫提供有效的代理，保证各个爬虫拿到的都是对应网站有效的代理IP，从而保证爬虫快速稳定的运行，当然在公司做的东西不能开源出来。不过呢，闲暇时间手痒，所以就想利用一些免费的资源搞一个简单的代理池服务。
@@ -12,6 +12,7 @@
 * 代理IP从何而来？
 
 　　刚自学爬虫的时候没有代理IP就去西刺、快代理之类有免费代理的网站去爬，还是有个别代理能用。当然，如果你有更好的代理接口也可以自己接入。
+　　
 　　免费代理的采集也很简单，无非就是：访问页面页面 —> 正则/xpath提取 —> 保存
 
 * 如何保证代理质量？
@@ -20,7 +21,7 @@
 
 * 采集回来的代理如何存储？
 
-　　这里不得不推荐一个高性能支持多种数据结构的NoSQL数据库[SSDB](http://ssdb.io/docs/zh_cn/)，用于代理Redis。支持队列、hash、set、k-v对，支持T级别数据。是做分布式爬虫很好中间存储工具。
+　　这里不得不推荐一个高性能支持多种数据结构的NoSQL数据库[SSDB](http://ssdb.io/docs/zh_cn/)，用于替代Redis。支持队列、hash、set、k-v对，支持T级别数据。是做分布式爬虫很好中间存储工具。
 
 * 如何让爬虫更简单的使用这些代理？
 
@@ -97,18 +98,18 @@ pip install -r requirements.txt
 启动:
 
 ```
-需要分别启动定时任务和api
-到Config.ini中配置你的SSDB
+如果你的依赖已经安全完成并且具备运行条件,可以直接在Run下运行main.py
+到Run目录下:
+>>>python main.py
 
-项目目录下:
->>>python -m Schedule.ProxyRefreshSchedule
+如果运行成功你应该可以看到有4个main.py进程在
 
-到Api目录下:
->>>python -m Api.ProxyApi
+
+你也可以分别运行他们,依次到Api下启动ProxyApi.py,Schedule下启动ProxyRefreshSchedule.py和ProxyValidSchedule.py即可
 ```
 
 ### 5、使用
-　　定时任务启动后，会通过代理获取方法fetch所有代理放入数据库并验证。此后默认每20分钟会重复执行一次。定时任务启动大概一两分钟后，便可在SSDB中看到刷新出来的可用的代理：
+　　定时任务启动后，会通过代理获取方法fetch所有代理放入数据库并验证。此后默认每20分钟会重复执行一次。定时任务启动大概一两分钟后，便可在[SSDB](https://github.com/jhao104/SSDBAdmin)中看到刷新出来的可用的代理：
     
 ![useful_proxy](https://pic2.zhimg.com/v2-12f9b7eb72f60663212f317535a113d1_b.png)
     
@@ -141,10 +142,12 @@ def delete_proxy(proxy):
 
 def spider():
     # ....
-    requests.get('https://www.example.com', proxies={"http": "http://{}".format(get_proxy)})
+    requests.get('https://www.example.com', proxies={"http": "http://{}".format(get_proxy())})
     # ....
 
 ```
+
+　　测试地址：http://123.207.35.36:5000 单机勿压测。谢谢
 
 ### 6、最后
 　　时间仓促，功能和代码都比较简陋，以后有时间再改进。喜欢的在github上给个star。感谢！
